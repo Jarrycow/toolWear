@@ -1,0 +1,3 @@
+In the tool wear labels table, Wn, Di, high speed steel and superalloy is the tool wear label of the data under corresponding machining conditions, Blade-j is the tool wear of the j-th cutting edge, the unit of tool wear values is mm.
+and the data of row number-n under a certain cutting condition is the label corresponding to n.csv under this cutting condition.
+Since each file corresponds to a phase of the monitoring signals, the tool is detected once, and specific tool wear values during a period needs to be interpolated between two adjacent detected labels.
