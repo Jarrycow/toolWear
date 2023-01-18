@@ -1,8 +1,11 @@
 import os
+import random
 import numpy as np
 import pandas as pd
 from scipy import interpolate
+from torch.utils.data import Dataset, DataLoader
 from preProcess.get_args import get_args
+from preProcess.Mydataset import Mydataset
 
 def readFile(path):  # 读取文件
     '''
@@ -98,11 +101,16 @@ def interDf(df): # 插值
             Y3.append(temp_y3 + temp_k3 * temp_i)
             Y4.append(temp_y4 + temp_k4 * temp_i)
     # print(np.array([Y1,Y2,Y3,Y4]).T)
-    dfY = pd.DataFrame(np.array([Y1,Y2,Y3,Y4]).T, columns=['Blade-1','Blade-2','Blade-3','Blade-4'])
+    dfX = df.loc[:,'Number': 'Spindle current']  # 获取因变量
+    dfY = pd.DataFrame(np.array([Y1,Y2,Y3,Y4]).T, columns=['Blade-1','Blade-2','Blade-3','Blade-4'])  # 获取自变量
     # print(dfY)
-    
+    XlisT = dfX.values.T.tolist()
+    YlisT = dfY.values.T.tolist()
+    arrLisT = (np.array(XlisT + YlisT)).T
+    df = pd.DataFrame(arrLisT)
+    df.to_csv('df.csv', encoding='utf-8',index=True)
     # print(dfX)
-    return dfX, dfY
+    return df
 
 def dfGenerator(dataX, dataY):  # 生成数据
     df = pd.DataFrame(columns=['Number', 'W1',
@@ -125,18 +133,127 @@ def dfGenerator(dataX, dataY):  # 生成数据
 
         df = pd.concat([df, dfTemp])
     
-    dfX = df.loc[:,'Number': 'Spindle current']
-    dfY = interDf(df)  # 插值
+    # dfX = df.loc[:,'Number': 'Spindle current']
+    # dfY = interDf(df)  # 插值
     # df.to_csv('df.csv', encoding='utf-8',index=True)
-    return dfX, dfY
+    # dfX.to_csv('dfX.csv', encoding='utf-8',index=True)
+    # dfY.to_csv('dfY.csv', encoding='utf-8',index=True)
+    # return dfX, dfY
+    df = interDf(df)
+    return df
+
+def scramble_data(lisDf):  # 打乱数据
+    '''
+    参数:
+    - text: [[int]]
+    返回: 
+    - text[0]: 
+    '''
+    cc = list(zip(lisDf))  # 创建一个包含文本中原始字符的图元列表；zip为制作元组
+    random.seed(100)  # 随机种子
+    random.shuffle(cc)  # 随机每个列表
+    lisDf[:] = zip(*cc)  # 解压为列表
+    return lisDf[0]
+
+def setGenerator(df):  # 数据集生成器
+    '''
+    参数:
+    - df: 全部数据
+    返回:
+    - train_x: 训练集自变量
+    - train_y: 训练集因变量
+    - valid_x: 验证集自变量
+    - valid_y: 验证集因变量
+    - test_x:  测试集自变量
+    - test_y:  测试集因变量
+    '''
+    args = get_args()
+    fold = args.fold
+    batch_size = args.batch_size
+    set_size = args.set_size
+
+    lisDf = df.values.tolist()  # 转换为列表
+    da = scramble_data(lisDf)  # 打乱数据
+    print('rand the data')
+
+    x=[]
+    for j in range(set_size):  # 将 da 分成五等份切片，分为训练集、验证集、测试集
+        x.append(da[(len(da)*j)//set_size: (len(da)*(j+1))//set_size])
+    train=[]
+    valid=x[fold%set_size]  # 从 x 中取出一个部分并赋值给验证集
+    test=x[(fold+1)%set_size]  # 从 x 中取出另一个部分并赋值给测试集
+    for i in range(2,5):  # 取出剩余部分分给训练集
+        train+=x[(i+fold)%5]
+    print('train valid test')
+
+    train_x=np.array(train)[:,0:10]  # 自变量,16序列
+    print('train_x')
+    train_y=np.array(train)[:,10:]  # 因变量，APP编号
+    print('train_y')
+    valid_x=np.array(valid)[:,0:10]
+    print('valid_x') 
+    valid_y=np.array(valid)[:,10:]
+    print('valid_y') 
+    test_x=np.array(test)[:,0:10]
+    print('test_x') 
+    test_y=np.array(test)[:,10:]
+    print('test_y')  
+    return train_x, train_y, valid_x, valid_y, test_x, test_y
+
+def setArrInt(arr):  # 将数组中的str全部转换为字符串
+    '''
+    参数:
+    - arr: 二维numpy, stype = str
+    返回:
+    - arr: 二维numpy, stype = float
+    '''
+    arr = arr.T
+    if len(arr) == 10:
+        arr[1] = [i[1:] for i in arr[1]]
+    arr = arr.astype(np.float)
+    arr = arr.T
+    return arr
+
+def dataLoad(df):  # 加载器生成
+    args = get_args()
+    batch_size = args.batch_size
+
+    train_x, train_y, valid_x, valid_y, test_x, test_y = setGenerator(df)
+    train_x, train_y, valid_x, valid_y, test_x, test_y = setArrInt(train_x), setArrInt(train_y), setArrInt(valid_x), setArrInt(valid_y), setArrInt(test_x), setArrInt(test_y)
+    train_dataloader = []  # 训练数据加载器
+    valid_dataloader = []  # 验证数据加载器
+    test_dataloader = []  # 测试数据加载器
+    # 这里要把x中的非数值换成数字，大概是.T翻转之后再用列表生成器换一下，不管了睡觉
+    train_dataloader.append(
+        DataLoader(Mydataset(np.array(train_x), np.array(train_y)),
+                    batch_size=batch_size,
+                    shuffle=True, num_workers=0))
+    valid_dataloader.append(
+        DataLoader(Mydataset(np.array(valid_x), np.array(valid_y)),
+                    batch_size=batch_size,
+                    shuffle=True, num_workers=0))
+    test_dataloader.append(
+        DataLoader(Mydataset(np.array(test_x), np.array(test_y)),
+                    batch_size=batch_size,
+                    shuffle=True, num_workers=0))
+    return [train_dataloader,valid_dataloader,test_dataloader]
+
+    
 
 def A():
-    args = get_args()
-    dataDir = args.data_dir  # data 目录
-    fileLabel = args.fileLabel  # label 文件
-    fileLabel = dataDir + fileLabel
-    # path = os.path.abspath(fileLabel)
-    dataX = readX(dataDir)  # [[材质, 序号 ,df]]
-    dataY = readY(fileLabel)  # [[材质, 序号 ,df]]
-    dfGenerator(dataX, dataY)
+    # args = get_args()
+    # dataDir = args.data_dir  # data 目录
+    # fileLabel = args.fileLabel  # label 文件
+    # fileLabel = dataDir + fileLabel
+    # dataX = readX(dataDir)  # [[材质, 序号 ,df]]
+    # dataY = readY(fileLabel)  # [[材质, 序号 ,df]]
+    # df = dfGenerator(dataX, dataY)  # 因变量，自变量
+    print('begin')
+    df = pd.read_csv('df.csv', header=0, index_col=0)  # 所有数据
+    print('read the csv')
+    dataLoad(df)
+    # 
+    
+
+
     pass
