@@ -215,6 +215,14 @@ def setArrInt(arr):  # 将数组中的str全部转换为字符串
     return arr
 
 def dataLoad(df):  # 加载器生成
+    '''
+    参数:
+    - df: 数据
+    返回:
+    - train_dataloader: 训练集加载器
+    - valid_dataloader: 验证集加载器
+    - test_dataloader: 测试集加载器
+    '''
     args = get_args()
     batch_size = args.batch_size
 
@@ -236,11 +244,11 @@ def dataLoad(df):  # 加载器生成
         DataLoader(Mydataset(np.array(test_x), np.array(test_y)),
                     batch_size=batch_size,
                     shuffle=True, num_workers=0))
-    return [train_dataloader,valid_dataloader,test_dataloader]
+    return train_dataloader,valid_dataloader,test_dataloader
 
     
 
-def A():
+def fileProcess():
     # args = get_args()
     # dataDir = args.data_dir  # data 目录
     # fileLabel = args.fileLabel  # label 文件
@@ -251,9 +259,5 @@ def A():
     print('begin')
     df = pd.read_csv('df.csv', header=0, index_col=0)  # 所有数据
     print('read the csv')
-    dataLoad(df)
-    # 
-    
-
-
-    pass
+    train_dataloader,valid_dataloader,test_dataloader = dataLoad(df)
+    return [train_dataloader,valid_dataloader,test_dataloader]
