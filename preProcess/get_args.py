@@ -22,7 +22,7 @@ def get_args():
     parser.add_argument('-kernel_size',  metavar='INPUT',type=int, default=13)  # 内核大小
     parser.add_argument('-vocab_text_size',  metavar='INPUT',type=int, default=1500)  # 语料库中词汇表的大小
     # CNN 参数
-    parser.add_argument('-layers', metavar='INPUT', type=int, default=4)
+    
     # BiGRU参数
 
 
