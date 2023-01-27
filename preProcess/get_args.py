@@ -16,15 +16,15 @@ def get_args():
     parser.add_argument('-input_channel', metavar='INPUT', type=int, default=10)  # 输入通道数量
     parser.add_argument('-output_size', metavar='INPUT', type=int, default=4)  # 输出通道数量
     parser.add_argument('-in_ker_num', metavar='INPUT', type=int, default=64)  # 输入内核数量
-    parser.add_argument('-layers', metavar='INPUT', type=int, default=4)  # 网络层数
     parser.add_argument('-dropout', metavar='INPUT', type=float, default=0.25)  # dropout
     parser.add_argument('-seq_leng',  metavar='INPUT',type=int, default=10)  # 序列长度
     parser.add_argument('-kernel_size',  metavar='INPUT',type=int, default=13)  # 内核大小
     parser.add_argument('-vocab_text_size',  metavar='INPUT',type=int, default=1500)  # 语料库中词汇表的大小
     # CNN 参数
-    
+    parser.add_argument('-cnnConvKernel', metavar='INPUT', type=int, default=3)
+    parser.add_argument('-cnnPoolKernel', metavar='INPUT', type=int, default=2)
     # BiGRU参数
-
+    parser.add_argument('-layers', metavar='INPUT', type=int, default=4)  # 网络层数
 
     return parser.parse_args()
 

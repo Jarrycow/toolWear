@@ -22,9 +22,9 @@ class Mydataset(Dataset):
         x=np.array(x[:,:seq_leng])
         
         self.x_data = x.reshape(-1, seq_leng, 1)
-        self.x_data = torch.LongTensor(self.x_data)
+        self.x_data = torch.FloatTensor(self.x_data)
         self.y_data = y.reshape(-1, 4, 1)
-        self.y_data = torch.LongTensor(self.y_data)
+        self.y_data = torch.FloatTensor(self.y_data)
         pass
 
     def __len__(self):  # 
