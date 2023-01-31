@@ -93,7 +93,7 @@ class TCN(nn.Module):  # TCN
         super(TCN, self).__init__()
         self.seq_leng =seq_leng
         self.vocab_text_size=vocab_text_size
-        self.con_embed = nn.Conv2d(1, input_channel, (1, self.vocab_text_size), 1)
+        self.con_embed = nn.Conv2d(1, 4, (self.vocab_text_size, 1), 1)
         self.tcn = TemporalConvNet(input_channel, num_channels, kernel_size=kernel_size, dropout=dropout)
         self.classify = nn.Sequential(
             nn.Linear(num_channels[-1]*2, num_channels[-1]),
@@ -103,15 +103,14 @@ class TCN(nn.Module):  # TCN
 
 
     def forward(self, inputs):
-        inputs = inputs.abs()
-        inputs= torch.transpose(inputs,2,1)
-        new_inputs = F.one_hot(inputs, num_classes=self.vocab_text_size).float()
-        new_inputs = self.con_embed(new_inputs).squeeze()
+        inputs = inputs.abs()  # [256,14,1]
+        inputs = inputs.reshape([inputs.shape[0], 1, inputs.shape[1], inputs.shape[2]])
+        new_inputs = self.con_embed(inputs).squeeze()  
         '''
         TCN:
         Inputs have to have dimension (N, C_in, L_in)
         '''
-        y1 = self.tcn(new_inputs)  
+        y1 = self.tcn(new_inputs)  # [256,4,5]
         out = self.classify(y1[:,:,-2:].reshape(y1.shape[0], -1))
         
         return out

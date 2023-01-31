@@ -133,12 +133,6 @@ def dfGenerator(dataX, dataY):  # 生成数据
 
         df = pd.concat([df, dfTemp])
     
-    # dfX = df.loc[:,'Number': 'Spindle current']
-    # dfY = interDf(df)  # 插值
-    # df.to_csv('df.csv', encoding='utf-8',index=True)
-    # dfX.to_csv('dfX.csv', encoding='utf-8',index=True)
-    # dfY.to_csv('dfY.csv', encoding='utf-8',index=True)
-    # return dfX, dfY
     df = interDf(df)
     return df
 
@@ -269,30 +263,17 @@ def dataLoad(df):  # 加载器生成
         DataLoader(Mydataset(np.array(test_x), np.array(test_y)),
                     batch_size=batch_size,
                     shuffle=True, num_workers=0))
-    
-    # train_dataloader = np.squeeze(train_dataloader)  
-    # for idx, (data, target) in enumerate(train_dataloader): 
-    # for i in train_dataloader: 
-    #     pass
-    # for idx, (data, target) in enumerate(test_dataloader): 
-    #     print(target[0])
     return train_dataloader,valid_dataloader,test_dataloader
 
-def one_hot(df):
-    print(df)  
-    pass
+
 
 def fileProcess():
-    # args = get_args()
-    # dataDir = args.data_dir  # data 目录
-    # fileLabel = args.fileLabel  # label 文件
-    # fileLabel = dataDir + fileLabel
-    # dataX = readX(dataDir)  # [[材质, 序号 ,df]]
-    # dataY = readY(fileLabel)  # [[材质, 序号 ,df]]
-    # df = dfGenerator(dataX, dataY)  # 因变量，自变量
-    print('begin')
-    df = pd.read_csv('df.csv', header=0, index_col=0)  # 所有数据
-    print('read the csv')
-    # df = one_hot(df)
+    args = get_args()
+    dataDir = args.data_dir  # data 目录
+    fileLabel = args.fileLabel  # label 文件
+    fileLabel = dataDir + fileLabel
+    dataX = readX(dataDir)  # [[材质, 序号 ,df]]
+    dataY = readY(fileLabel)  # [[材质, 序号 ,df]]
+    df = dfGenerator(dataX, dataY)  # 因变量，自变量
     train_dataloader,valid_dataloader,test_dataloader = dataLoad(df)
     return [train_dataloader,valid_dataloader,test_dataloader]
