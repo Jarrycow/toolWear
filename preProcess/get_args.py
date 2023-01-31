@@ -9,7 +9,7 @@ def get_args():
     parser.add_argument('-fold', metavar='INPUT', type=int, default=0)  # 折叠数
     parser.add_argument('-CUDA', metavar='INPUT', type=str, default='0')  # CUDA 版本
     parser.add_argument('-batch_size', metavar='INPUT', type=int, default=256)  # 批处理大小，每次迭代中使用的样本数
-    parser.add_argument('-set_size', metavar='INPUT', type=int, default=5000)  # 数据分割多少份
+    parser.add_argument('-set_size', metavar='INPUT', type=int, default=5)  # 数据分割多少份
     parser.add_argument('-num_epochs', metavar='INPUT', type=int, default=100)  # 迭代次数
     parser.add_argument('-save_models', metavar='INPUT', type=str, default='./data/models/')  # 保存模型文件夹
     # TCN 参数

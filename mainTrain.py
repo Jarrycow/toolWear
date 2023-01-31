@@ -20,7 +20,6 @@ def setDevice(): # 设置设备
     CUDA_VISIBLE_DEVICES = args.CUDA  # CUDA版本
     os.environ['CUDA_VISIBLE_DEVICES'] = CUDA_VISIBLE_DEVICES  # 设置CUDA
     device = torch.device("cuda"if torch.cuda.is_available() else "cpu")  # 调用GPU
-    device = torch.device("cpu")
     return device
 
 def train(model, device, train_loader, optimizer, epochs, i, loss_fn, trainModel):  # 

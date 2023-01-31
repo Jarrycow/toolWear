@@ -45,8 +45,6 @@ def testProcess(model, device, testData):
     - null
     '''
     model.eval()  # 将模型设置为评估模式
-    # y_true = torch.LongTensor(0).to(device)  # 创建空的真实标签张量并移动到指定设备上
-    # y_predict = torch.LongTensor(0).to(device)  # 创建空的预测标签张量并移动到指定设备上
     with torch.no_grad():  # 在评估模式下遍历验证集数据
         for idx, (data, target) in enumerate(testData):
             data, target = data.to(device), target.to(device)  # 将数据和标签移动到指定设备上
